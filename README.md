@@ -1,4 +1,4 @@
-## This is CS50p Project
+## This is CS50p Project - WIP
 _CS50p is an introduction to programming using Python. [link to course](https://cs50.harvard.edu/python/)_
 
 
