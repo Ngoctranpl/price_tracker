@@ -9,6 +9,18 @@ import os
 from dotenv import load_dotenv
 from email.message import EmailMessage
 from email.headerregistry import Address
+import logging
+
+
+# --- Logging Configuration ---
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("tracker.log"),
+        logging.StreamHandler()
+    ]
+)
 
 
 URL = "https://www.mohito.com/pl/pl/sukienka-maxi-z-wiskozy-2-668fv-08p"
@@ -27,7 +39,7 @@ def main():
         sys.exit("Please set SMTP_HOST in .env file")    
     price, currency = get_price()
     today = date.today().strftime("%d/%m/%y")
-    print(f"Price on {today} is {price} {currency}")
+    logging.info(f"Price on {today} is {price} {currency}")
     save(today, price, currency)
     if price < TARGET_PRICE:
         send_alert(price)
@@ -45,7 +57,8 @@ def get_price(link=URL):
         return price, currency
 
     except Exception as e:
-        sys.exit(f"An error occured: {e}")
+        logging.Exception(f"Error during price extraction: {e}")
+        sys.exit()
 
 
 # to log the price in a CSV file
@@ -53,7 +66,7 @@ def save(date, price, currency):
     with open("price_report.csv", mode="a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow([date, price, currency])
-        print("Price is logged into price_report.csv file")
+        logging.info("Price is logged into price_report.csv file")
 
 
 def send_alert(price):
@@ -69,7 +82,7 @@ def send_alert(price):
     msg["To"] = to_addr
     msg["X-Mailer"] = "Ngoc notifier"  # this reduces a chance to arrive into SPAM
     msg.set_content(text)
-    print(f"Sending e-mail: '{subject}' from {from_addr} to {to_addr}")
+    logging.info(f"Sending e-mail: '{subject}' from {from_addr} to {to_addr}")
     with smtplib.SMTP(os.getenv("SMTP_HOST"), 587) as s:
         s.ehlo()  # Identify ourselves to the SMTP server and enable extended SMTP features
         s.starttls()  # Upgrade the connection to secure TLS
