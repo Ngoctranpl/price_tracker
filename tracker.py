@@ -17,6 +17,14 @@ TARGET_PRICE = 249.99
 
 def main():
     load_dotenv()
+    if not os.getenv("EMAIL_FROM"):
+        sys.exit("Please set EMAIL_FROM in .env file")
+    if not os.getenv("EMAIL_TO"):
+        sys.exit("Please set EMAIL_TO in .env file")
+    if not os.getenv("EMAIL_PASS"):
+        sys.exit("Please set EMAIL_PASS in .env file")
+    if not os.getenv("SMTP_HOST"):
+        sys.exit("Please set SMTP_HOST in .env file")    
     price, currency = get_price()
     today = date.today().strftime("%d/%m/%y")
     print(f"Price on {today} is {price} {currency}")
@@ -26,9 +34,9 @@ def main():
 
 
 # to extract price from given website
-def get_price():
+def get_price(link=URL):
     try:
-        r = requests.get(URL)
+        r = requests.get(link)
         soup = BeautifulSoup(r.text, features="html.parser")
         script_tag = soup.find(type="application/ld+json")
         content = json.loads(script_tag.string)
